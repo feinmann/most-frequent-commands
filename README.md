@@ -47,6 +47,16 @@ The tool integrates with fish shell to provide quick access to your most frequen
 - `Ctrl+Shift+→`: Shows your second most frequent command
 - `Ctrl+Shift+←`: Shows your third most frequent command
 
+## How It Works
+
+The tool uses fish's built-in `history` command to get a complete list of all commands, including adjacent duplicates. This provides more accurate frequency counting than reading the history file directly, as the history file (`~/.local/share/fish/fish_history`) eliminates adjacent identical commands.
+
+The process:
+1. Executes `fish -c "history"` to get the complete command history
+2. Normalizes each command (removes extra spaces, quotes, etc.)
+3. Counts the frequency of each normalized command
+4. Sorts commands by frequency
+
 ## Debugging
 
 The tool includes a debug mode that can help diagnose issues with command frequency counting. To enable debug output, use the `-d` or `--debug` flag:
@@ -59,7 +69,6 @@ The debug output will show:
 
 ```
 === DEBUG OUTPUT ===
-History file: /home/user/.local/share/fish/fish_history
 Total commands processed: 1234
 Unique commands found: 567
 
@@ -73,16 +82,11 @@ Top 20 commands:
 
 ### Interpreting Debug Output
 
-1. **History File Location**: Shows the exact path of the fish history file being read. Verify this matches your system's configuration.
+1. **Total Commands Processed**: The total number of commands found in your history. This includes all commands, even adjacent duplicates.
 
-2. **Total Commands Processed**: The total number of commands found in your history file. If this number seems low, it might indicate:
-   - The history file is not being read correctly
-   - The history file is empty or truncated
-   - The file format is not being parsed correctly
+2. **Unique Commands Found**: The number of distinct commands after normalization. If this is much lower than total commands, it means many commands are duplicates.
 
-3. **Unique Commands Found**: The number of distinct commands after normalization. If this is much lower than total commands, it means many commands are duplicates.
-
-4. **Top 20 Commands**: Shows the most frequently used commands with their counts. This can help identify:
+3. **Top 20 Commands**: Shows the most frequently used commands with their counts. This can help identify:
    - If command normalization is working correctly
    - If certain commands are being counted multiple times
    - If expected commands are missing or have unexpected counts
@@ -100,18 +104,14 @@ Top 20 commands:
    - Look for similar commands that might be counted separately
 
 3. **Empty Output**: If no commands are shown:
-   - Verify the history file exists and is readable
-   - Check if the file format matches the expected YAML format
+   - Verify that `fish -c "history"` works in your shell
    - Ensure you have command history in fish
-
-## How It Works
-
-The tool reads your fish shell history file (`~/.local/share/fish/fish_history`), counts the frequency of each command, and allows you to quickly access them through keyboard shortcuts.
+   - Check if there are any permission issues
 
 ## Troubleshooting
 
 If the commands are not showing up:
 
 1. Make sure you have some command history in fish shell
-2. Check if the history file exists at `~/.local/share/fish/fish_history`
+2. Try running `fish -c "history"` to verify you can access the history
 3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history 
