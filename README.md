@@ -39,7 +39,7 @@ most-frequent-commands analyze --top 10
 most-frequent-commands get --index 0
 ```
 
-### Shell Integration
+### Shell Integration #TODO not working
 
 The tool integrates with fish shell to provide quick access to your most frequent commands:
 
