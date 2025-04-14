@@ -1,6 +1,6 @@
 # Most Frequent Commands
 
-A tool to display and use your most frequently used shell commands in fish shell.
+A tool to display and use your most frequently used shell commands in fish shell. (Created with the help of cursor)
 
 ## Installation
 
