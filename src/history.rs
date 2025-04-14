@@ -95,7 +95,9 @@ mod tests {
 5 git status
 6 ls
 7 cd
-8 cd"#;
+8 cd
+9 ls
+10 git status"#;
 
         // Create a mock CommandFrequency
         let mut commands = HashMap::new();
@@ -122,12 +124,12 @@ mod tests {
         
         // Verify the order and counts
         assert_eq!(most_frequent[0].0, "ls");
-        assert_eq!(*most_frequent[0].1, 3);  // ls appears 3 times
+        assert_eq!(*most_frequent[0].1, 4);  // ls appears 4 times
         
         assert_eq!(most_frequent[1].0, "cd");
         assert_eq!(*most_frequent[1].1, 3);  // cd appears 3 times
         
-        assert_eq!(most_frequent[2].0, "ls -la");
-        assert_eq!(*most_frequent[2].1, 1);  // ls -la appears 1 time
+        assert_eq!(most_frequent[2].0, "git status");
+        assert_eq!(*most_frequent[2].1, 2);  // git status appears 1 time
     }
 } 
