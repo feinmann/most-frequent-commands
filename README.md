@@ -43,11 +43,18 @@ most-frequent-commands get --index 0
 
 The tool integrates with fish shell to provide quick access to your most frequent commands:
 
-- `↑` (Up Arrow): Shows your most frequent command
-- `Ctrl+↑`: Shows your most frequent command
-- `Shift+↑`: Shows your second most frequent command
-- `Alt+↑`: Shows your third most frequent command
+- `Ctrl+Shift+↑`: Shows your most frequent command
+- `Ctrl+Shift+→`: Shows your second most frequent command
+- `Ctrl+Shift+←`: Shows your third most frequent command
 
 ## How It Works
 
-The tool reads your fish shell history file (`~/.local/share/fish/fish_history`), counts the frequency of each command, and allows you to quickly access them through keyboard shortcuts. 
+The tool reads your fish shell history file (`~/.local/share/fish/fish_history`), counts the frequency of each command, and allows you to quickly access them through keyboard shortcuts.
+
+## Troubleshooting
+
+If the commands are not showing up:
+
+1. Make sure you have some command history in fish shell
+2. Check if the history file exists at `~/.local/share/fish/fish_history`
+3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history 
