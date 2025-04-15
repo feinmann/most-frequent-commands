@@ -1,12 +1,18 @@
-use clap::Parser;
+use clap::{Parser, Subcommand, Args};
 use anyhow::Result;
 mod history;
 
 /// A command-line tool to analyze and display frequently used commands
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-enum Args {
-    /// Analyze and display most frequent commands
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// Analyze command history and show most frequent commands
     Analyze {
         /// Number of top commands to show
         #[arg(short, long, default_value_t = 10)]
@@ -16,10 +22,11 @@ enum Args {
         #[arg(short, long)]
         debug: bool,
     },
-    /// Get the nth most frequent command
+    
+    /// Get a specific command by its index in the frequency list
     Get {
         /// Index of the command to get (0-based)
-        #[arg(short, long, default_value_t = 0)]
+        #[arg(short, long)]
         index: usize,
         
         /// Enable debug output
@@ -29,10 +36,10 @@ enum Args {
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
+    let args = Cli::parse();
 
-    match args {
-        Args::Analyze { top, debug } => {
+    match args.command {
+        Commands::Analyze { top, debug } => {
             let frequency = history::CommandFrequency::new(debug)?;
             let most_frequent = frequency.get_most_frequent(top);
             
@@ -41,7 +48,7 @@ fn main() -> Result<()> {
                 println!("{}. {} (used {} times)", i + 1, cmd, count);
             }
         }
-        Args::Get { index, debug } => {
+        Commands::Get { index, debug } => {
             let frequency = history::CommandFrequency::new(debug)?;
             let most_frequent = frequency.get_most_frequent(index + 1);
             
