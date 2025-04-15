@@ -22,12 +22,7 @@ function my_hist --on-event fish_preexec --description "Track fish history in fi
 end
 ```
 
-4. Create the history directory:
-```bash
-mkdir -p ~/.local/share/fish
-```
-
-5. Restart your fish shell or run:
+4. Restart your fish shell or run:
 ```bash
 source ~/.config/fish/config.fish
 ```
