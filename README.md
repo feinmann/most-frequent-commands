@@ -14,15 +14,17 @@ cargo build --release
 cp target/release/most-frequent-commands ~/.local/bin/
 ```
 
-3. Install the fish shell function:
-```bash
-mkdir -p ~/.config/fish/functions
-cp fish_functions/most-frequent-commands.fish ~/.config/fish/functions/
+3. Add this function to your `~/.config/fish/config.fish`:
+(source: https://github.com/fish-shell/fish-shell/issues/5938)
+```fish
+function my_hist --on-event fish_preexec --description "Track fish history in file"
+    echo $argv >> ~/.local/share/fish/custom_history
+end
 ```
 
 4. Restart your fish shell or run:
 ```bash
-source ~/.config/fish/functions/most-frequent-commands.fish
+source ~/.config/fish/config.fish
 ```
 
 ## Usage
@@ -39,13 +41,15 @@ most-frequent-commands analyze --top 10
 most-frequent-commands get --index 0
 ```
 
-### Shell Integration #TODO not working
+## How It Works
 
-The tool integrates with fish shell to provide quick access to your most frequent commands:
+The tool reads from a custom history file (`~/.local/share/fish/custom_history`) that maintains a complete record of all commands. This provides more accurate frequency counting than fish's built-in history.
 
-- `Ctrl+Shift+↑`: Shows your most frequent command
-- `Ctrl+Shift+→`: Shows your second most frequent command
-- `Ctrl+Shift+←`: Shows your third most frequent command
+The process:
+1. Each command is logged to the custom history file
+2. The tool reads and normalizes each command from the history file
+3. Commands are counted and sorted by frequency
+4. The most frequent commands are displayed or returned
 
 ## Debugging
 
@@ -59,7 +63,7 @@ The debug output will show:
 
 ```
 === DEBUG OUTPUT ===
-History file: /home/user/.local/share/fish/fish_history
+History file: /home/user/.local/share/fish/custom_history
 Total commands processed: 1234
 Unique commands found: 567
 
@@ -73,45 +77,35 @@ Top 20 commands:
 
 ### Interpreting Debug Output
 
-1. **History File Location**: Shows the exact path of the fish history file being read. Verify this matches your system's configuration.
+1. **History File Location**: Shows the path of the custom history file being read.
 
-2. **Total Commands Processed**: The total number of commands found in your history file. If this number seems low, it might indicate:
-   - The history file is not being read correctly
-   - The history file is empty or truncated
-   - The file format is not being parsed correctly
+2. **Total Commands Processed**: The total number of commands found in your history.
 
-3. **Unique Commands Found**: The number of distinct commands after normalization. If this is much lower than total commands, it means many commands are duplicates.
+3. **Unique Commands Found**: The number of distinct commands after normalization.
 
-4. **Top 20 Commands**: Shows the most frequently used commands with their counts. This can help identify:
-   - If command normalization is working correctly
-   - If certain commands are being counted multiple times
-   - If expected commands are missing or have unexpected counts
+4. **Top 20 Commands**: Shows the most frequently used commands with their counts.
 
 ### Common Issues and Solutions
 
 1. **Missing Commands**: If a command you expect to see is missing:
-   - Check if it's in a different format in the history (e.g., with quotes or different spacing)
-   - Verify the command appears in your fish history
+   - Check if it's in a different format in the history
+   - Verify the command appears in your custom history file
    - Try running the command again to ensure it's recorded
 
 2. **Unexpected Counts**: If command counts seem incorrect:
-   - Check if the command appears in different formats in the history
+   - Check if the command appears in different formats
    - Verify if the command is being normalized correctly
    - Look for similar commands that might be counted separately
 
 3. **Empty Output**: If no commands are shown:
-   - Verify the history file exists and is readable
-   - Check if the file format matches the expected YAML format
+   - Verify that the custom history file exists and is readable
    - Ensure you have command history in fish
-
-## How It Works
-
-The tool reads your fish shell history file (`~/.local/share/fish/fish_history`), counts the frequency of each command, and allows you to quickly access them through keyboard shortcuts.
+   - Check if there are any permission issues
 
 ## Troubleshooting
 
 If the commands are not showing up:
 
 1. Make sure you have some command history in fish shell
-2. Check if the history file exists at `~/.local/share/fish/fish_history`
+2. Check if the custom history file exists at `~/.local/share/fish/custom_history`
 3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history 
