@@ -1,6 +1,6 @@
 # Most Frequent Commands
 
-A tool to display and use your most frequently used shell commands in fish shell. (Created with the help of cursor)
+A tool to display and use your most frequent shell commands in fish shell. (Created with the help of cursor)
 
 ## Installation
 
@@ -22,9 +22,20 @@ function my_hist --on-event fish_preexec --description "Track fish history in fi
 end
 ```
 
-4. Restart your fish shell or run:
+4. Create the history directory:
+```bash
+mkdir -p ~/.local/share/fish
+```
+
+5. Install the fish function for command cycling:
+```bash
+cp fish_functions/most-frequent-commands.fish ~/.config/fish/functions/
+```
+
+6. Restart your fish shell or run:
 ```bash
 source ~/.config/fish/config.fish
+source ~/.config/fish/functions/most-frequent-commands.fish
 ```
 
 ## Usage
@@ -40,6 +51,13 @@ most-frequent-commands analyze --top 10
 ```bash
 most-frequent-commands get --index 0
 ```
+
+### Keyboard Shortcuts
+
+- `Alt+j`: Cycle through your most frequent commands
+  - Each press shows the next command in the list
+  - Cycles back to the beginning when reaching the end
+  - The command is inserted at your cursor position
 
 ## How It Works
 

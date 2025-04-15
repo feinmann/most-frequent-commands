@@ -28,10 +28,6 @@ enum Commands {
         /// Index of the command to get (0-based)
         #[arg(short, long)]
         index: usize,
-        
-        /// Enable debug output
-        #[arg(short, long)]
-        debug: bool,
     },
 }
 
@@ -48,15 +44,15 @@ fn main() -> Result<()> {
                 println!("{}. {} (used {} times)", i + 1, cmd, count);
             }
         }
-        Commands::Get { index, debug } => {
-            let frequency = history::CommandFrequency::new(debug)?;
+        Commands::Get { index } => {
+            let frequency = history::CommandFrequency::new(false)?; // Always disable debug for get command
             let most_frequent = frequency.get_most_frequent(index + 1);
             
             if let Some((cmd, _)) = most_frequent.get(index) {
-                println!("{}", cmd);
-            } else {
-                println!("No command found at index {}", index);
+                // Only print the command, no extra output
+                print!("{}", cmd);
             }
+            // Don't print any error messages for get command
         }
     }
 

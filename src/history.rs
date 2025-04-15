@@ -15,13 +15,17 @@ impl CommandFrequency {
         // Get history from custom history file
         let history_file = Self::get_history_file()?;
         
-        println!("Reading history file: {:?}", history_file);
+        if debug {
+            println!("Reading history file: {:?}", history_file);
+        }
         
         if history_file.exists() {
             let content = fs::read_to_string(&history_file)
                 .with_context(|| format!("Failed to read history file: {:?}", history_file))?;
 
-            println!("History file content length: {} bytes", content.len());
+            if debug {
+                println!("History file content length: {} bytes", content.len());
+            }
             
             // Parse each line of history
             for line in content.lines() {
@@ -34,7 +38,7 @@ impl CommandFrequency {
                 *commands.entry(normalized_cmd).or_insert(0) += 1;
                 total_commands += 1;
             }
-        } else {
+        } else if debug {
             println!("History file does not exist");
         }
 
