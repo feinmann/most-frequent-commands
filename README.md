@@ -14,8 +14,7 @@ cargo build --release
 cp target/release/most-frequent-commands ~/.local/bin/
 ```
 
-3. Add this function to your `~/.config/fish/config.fish`:
-(source: https://github.com/fish-shell/fish-shell/issues/5938)
+3. Add this function to your `~/.config/fish/config.fish`[^1]:
 ```fish
 function my_hist --on-event fish_preexec --description "Track fish history in file"
     echo $argv >> ~/.local/share/fish/custom_history
@@ -126,4 +125,8 @@ If the commands are not showing up:
 
 1. Make sure you have some command history in fish shell
 2. Check if the custom history file exists at `~/.local/share/fish/custom_history`
-3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history 
+3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history
+
+---
+
+[^1]: The `my_hist` function is based on a solution from [fish-shell issue #5938](https://github.com/fish-shell/fish-shell/issues/5938) 
