@@ -14,15 +14,22 @@ cargo build --release
 cp target/release/most-frequent-commands ~/.local/bin/
 ```
 
-3. Install the fish shell function:
-```bash
-mkdir -p ~/.config/fish/functions
-cp fish_functions/most-frequent-commands.fish ~/.config/fish/functions/
+3. Add this function to your `~/.config/fish/config.fish`:
+(source: https://github.com/fish-shell/fish-shell/issues/5938)
+```fish
+function my_hist --on-event fish_preexec --description "Track fish history in file"
+    echo $argv >> ~/.local/share/fish/custom_history
+end
 ```
 
-4. Restart your fish shell or run:
+4. Create the history directory:
 ```bash
-source ~/.config/fish/functions/most-frequent-commands.fish
+mkdir -p ~/.local/share/fish
+```
+
+5. Restart your fish shell or run:
+```bash
+source ~/.config/fish/config.fish
 ```
 
 ## Usage
@@ -39,23 +46,15 @@ most-frequent-commands analyze --top 10
 most-frequent-commands get --index 0
 ```
 
-### Shell Integration #TODO not working
-
-The tool integrates with fish shell to provide quick access to your most frequent commands:
-
-- `Ctrl+Shift+↑`: Shows your most frequent command
-- `Ctrl+Shift+→`: Shows your second most frequent command
-- `Ctrl+Shift+←`: Shows your third most frequent command
-
 ## How It Works
 
-The tool uses fish's built-in `history` command to get a complete list of all commands, including adjacent duplicates. This provides more accurate frequency counting than reading the history file directly, as the history file (`~/.local/share/fish/fish_history`) eliminates adjacent identical commands.
+The tool reads from a custom history file (`~/.local/share/fish/custom_history`) that maintains a complete record of all commands. This provides more accurate frequency counting than fish's built-in history.
 
 The process:
-1. Executes `fish -c "history"` to get the complete command history
-2. Normalizes each command (removes extra spaces, quotes, etc.)
-3. Counts the frequency of each normalized command
-4. Sorts commands by frequency
+1. Each command is logged to the custom history file
+2. The tool reads and normalizes each command from the history file
+3. Commands are counted and sorted by frequency
+4. The most frequent commands are displayed or returned
 
 ## Debugging
 
@@ -69,6 +68,7 @@ The debug output will show:
 
 ```
 === DEBUG OUTPUT ===
+History file: /home/user/.local/share/fish/custom_history
 Total commands processed: 1234
 Unique commands found: 567
 
@@ -82,29 +82,28 @@ Top 20 commands:
 
 ### Interpreting Debug Output
 
-1. **Total Commands Processed**: The total number of commands found in your history. This includes all commands, even adjacent duplicates.
+1. **History File Location**: Shows the path of the custom history file being read.
 
-2. **Unique Commands Found**: The number of distinct commands after normalization. If this is much lower than total commands, it means many commands are duplicates.
+2. **Total Commands Processed**: The total number of commands found in your history.
 
-3. **Top 20 Commands**: Shows the most frequently used commands with their counts. This can help identify:
-   - If command normalization is working correctly
-   - If certain commands are being counted multiple times
-   - If expected commands are missing or have unexpected counts
+3. **Unique Commands Found**: The number of distinct commands after normalization.
+
+4. **Top 20 Commands**: Shows the most frequently used commands with their counts.
 
 ### Common Issues and Solutions
 
 1. **Missing Commands**: If a command you expect to see is missing:
-   - Check if it's in a different format in the history (e.g., with quotes or different spacing)
-   - Verify the command appears in your fish history
+   - Check if it's in a different format in the history
+   - Verify the command appears in your custom history file
    - Try running the command again to ensure it's recorded
 
 2. **Unexpected Counts**: If command counts seem incorrect:
-   - Check if the command appears in different formats in the history
+   - Check if the command appears in different formats
    - Verify if the command is being normalized correctly
    - Look for similar commands that might be counted separately
 
 3. **Empty Output**: If no commands are shown:
-   - Verify that `fish -c "history"` works in your shell
+   - Verify that the custom history file exists and is readable
    - Ensure you have command history in fish
    - Check if there are any permission issues
 
@@ -113,5 +112,5 @@ Top 20 commands:
 If the commands are not showing up:
 
 1. Make sure you have some command history in fish shell
-2. Try running `fish -c "history"` to verify you can access the history
+2. Check if the custom history file exists at `~/.local/share/fish/custom_history`
 3. Try running `most-frequent-commands analyze --top 10` to see if it can read your history 

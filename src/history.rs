@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use std::collections::HashMap;
-use std::process::Command;
+use std::fs;
+use std::path::PathBuf;
 
 pub struct CommandFrequency {
     commands: HashMap<String, usize>,
@@ -11,34 +12,35 @@ impl CommandFrequency {
         let mut commands = HashMap::new();
         let mut total_commands = 0;
 
-        // Get history from fish command
-        let output = Command::new("fish")
-            .arg("-c")
-            .arg("history")
-            .output()
-            .context("Failed to execute fish history command")?;
+        // Get history from custom history file
+        let history_file = Self::get_history_file()?;
+        
+        println!("Reading history file: {:?}", history_file);
+        
+        if history_file.exists() {
+            let content = fs::read_to_string(&history_file)
+                .with_context(|| format!("Failed to read history file: {:?}", history_file))?;
 
-        if !output.status.success() {
-            return Err(anyhow::anyhow!(
-                "Fish history command failed: {}",
-                String::from_utf8_lossy(&output.stderr)
-            ));
-        }
-
-        let history = String::from_utf8(output.stdout)
-            .context("Failed to parse fish history output")?;
-
-        // Parse each line of history
-        for line in history.lines() {
-            if let Some(cmd) = line.splitn(2, ' ').nth(1) {
-                let normalized_cmd = Self::normalize_command(cmd);
+            println!("History file content length: {} bytes", content.len());
+            
+            // Parse each line of history
+            for line in content.lines() {
+                // Skip empty lines
+                if line.trim().is_empty() {
+                    continue;
+                }
+                
+                let normalized_cmd = Self::normalize_command(line);
                 *commands.entry(normalized_cmd).or_insert(0) += 1;
                 total_commands += 1;
             }
+        } else {
+            println!("History file does not exist");
         }
 
         if debug {
             println!("\n=== DEBUG OUTPUT ===");
+            println!("History file: {:?}", history_file);
             println!("Total commands processed: {}", total_commands);
             println!("Unique commands found: {}", commands.len());
             
@@ -63,6 +65,18 @@ impl CommandFrequency {
         // Normalize multiple spaces to single space
         let cmd = cmd.split_whitespace().collect::<Vec<_>>().join(" ");
         cmd.to_string()
+    }
+
+    fn get_history_file() -> Result<PathBuf> {
+        let mut path = dirs::home_dir().context("Failed to get home directory")?;
+        path.push(".local/share/fish/custom_history");
+        
+        // Ensure directory exists
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).context("Failed to create history directory")?;
+        }
+        
+        Ok(path)
     }
 
     pub fn get_most_frequent(&self, count: usize) -> Vec<(&String, &usize)> {
@@ -130,6 +144,6 @@ mod tests {
         assert_eq!(*most_frequent[1].1, 3);  // cd appears 3 times
         
         assert_eq!(most_frequent[2].0, "git status");
-        assert_eq!(*most_frequent[2].1, 2);  // git status appears 1 time
+        assert_eq!(*most_frequent[2].1, 2);  // git status appears 2 times
     }
 } 
